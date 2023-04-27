@@ -1,3 +1,3 @@
 class Constants {
-  static const String appName = 'WebRTC Chat';
+  static const String appName = 'LMNOP WebRTC Test';
 }
