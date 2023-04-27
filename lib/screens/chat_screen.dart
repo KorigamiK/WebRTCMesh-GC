@@ -1,21 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:lmnop/models/message.dart';
+import 'package:lmnop/services/webrtc.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final WebRTCService webRTCService;
+  const ChatScreen({Key? key, required this.webRTCService}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final List<Message> _messages = [];
+  final TextEditingController _messageController = TextEditingController();
+  final List<String> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.webRTCService.onDataChannelMessage = (message) {
+      setState(() {
+        _messages.add(message);
+      });
+    };
+  }
+
+  @override
+  void dispose() {
+    widget.webRTCService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Room'),
+        title: const Text('Sending Screen'),
       ),
       body: Column(
         children: [
@@ -23,40 +41,35 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ListView.builder(
               itemCount: _messages.length,
               itemBuilder: (context, index) {
-                final message = _messages[index];
-                return ListTile(
-                  title: Text(message.sender),
-                  subtitle: Text(message.text),
-                );
+                return ListTile(title: Text(_messages[index]));
               },
             ),
           ),
-          const Divider(height: 1),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _messageController,
                     decoration: const InputDecoration(
-                      hintText: 'Type a message',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(16),
+                      hintText: 'Type your message',
                     ),
-                    onSubmitted: (text) {
-                      setState(() {
-                        _messages.add(Message(sender: 'Me', text: text));
-                      });
-                    },
                   ),
                 ),
-                IconButton(
+                const SizedBox(width: 8),
+                ElevatedButton(
                   onPressed: () {
-                    // Send message
+                    final message = _messageController.text.trim();
+                    if (message.isNotEmpty) {
+                      setState(() {
+                        _messages.add('You: $message');
+                      });
+                      widget.webRTCService.sendObject(message);
+                      _messageController.clear();
+                    }
                   },
-                  icon: const Icon(Icons.send),
+                  child: const Text('Send'),
                 ),
               ],
             ),
