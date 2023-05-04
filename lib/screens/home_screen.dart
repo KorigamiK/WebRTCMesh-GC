@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lmnop/screens/lobby_screen.dart';
-import 'package:lmnop/services/webrtc.dart';
+
+import 'lobby_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -11,49 +11,51 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _roomIdController = TextEditingController();
-  final webRTCService = WebRTCService();
-
-  Future<void> createRoom() async {
-    final roomId = await webRTCService.createRoom();
-    if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) =>
-            LobbyScreen(roomId: roomId, webRTCService: webRTCService)));
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create or Join a Room'),
+        title: const Text('WebRTC Chat'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _roomIdController,
-              decoration: const InputDecoration(
-                hintText: 'Enter Room ID',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: TextField(
+                controller: _roomIdController,
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(), hintText: 'Enter Room ID'),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
-                final roomId = _roomIdController.text.trim();
-                if (roomId.isNotEmpty) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LobbyScreen(
-                            roomId: roomId,
-                            webRTCService: webRTCService,
-                          )));
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LobbyScreen(
+                      roomId: _roomIdController.text,
+                    ),
+                  ),
+                );
               },
               child: const Text('Join Room'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10.0),
             ElevatedButton(
-              onPressed: createRoom,
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LobbyScreen(
+                      createRoom: true,
+                    ),
+                  ),
+                );
+              },
               child: const Text('Create Room'),
             ),
           ],
