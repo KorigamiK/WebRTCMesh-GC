@@ -16,7 +16,13 @@ class Signalling {
         .collection('rooms')
         .doc(roomID)
         .collection('messages');
-    _roomCollection.snapshots().listen((event) {
+    init();
+  }
+
+  Future<void> init() async {
+    var query = _roomCollection.where('timestamp',
+        isGreaterThan: DateTime.now().millisecondsSinceEpoch);
+    query.snapshots().listen((event) {
       onMessage?.call(event);
     });
   }
@@ -30,9 +36,5 @@ class Signalling {
       'announce': announce,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
-  }
-
-  Future<void> joinRoom() async {
-    await sendMessage('join', {}, announce: true);
   }
 }

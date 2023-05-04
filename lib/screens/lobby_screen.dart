@@ -27,11 +27,12 @@ class LobbyScreen extends StatelessWidget {
       _createdAt = room.data()!['created'];
     } else {
       if (createRoom) {
+        final created = DateTime.now().millisecondsSinceEpoch;
         await FirebaseFirestore.instance
             .collection('rooms')
             .doc(roomId)
-            .set({'created': DateTime.now().millisecondsSinceEpoch});
-        _createdAt = DateTime.now().millisecondsSinceEpoch;
+            .set({'created': created});
+        _createdAt = created;
       } else {
         throw Exception('Room $roomId does not exist');
       }
