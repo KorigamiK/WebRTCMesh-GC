@@ -51,3 +51,6 @@ android/
 macos/
 
 pubspec.lock
+idea*
+.github/*.js
+firebase_options.dart
