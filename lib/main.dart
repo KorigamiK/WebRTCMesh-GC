@@ -1,29 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:lmnop/screens/chat_screen.dart';
 import 'package:lmnop/screens/home_screen.dart';
-import 'package:lmnop/models/chat_client.dart';
 
-void main() {
+import 'utils/constants.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:lmnop/firebase_options.dart';
+
+dynamic main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UDP Chat App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/chat': (context) => ChatScreen(
-              client: ModalRoute.of(context)!.settings.arguments as ChatClient,
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: Constants.appName,
+        theme: ThemeData(
+          primaryColor: Colors.white,
+          scaffoldBackgroundColor: Colors.white,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Colors.black),
+          ),
+          textTheme: const TextTheme(
+            titleLarge: TextStyle(
+              fontSize: 18,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
             ),
-      },
-    );
-  }
+          ),
+        ),
+        home: const HomeScreen(),
+      );
 }

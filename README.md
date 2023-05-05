@@ -1,16 +1,39 @@
-# lmnop
+# WebRTC Mesh GC
 
-A new Flutter project.
+An implementation of a simple WebRTC mesh network with garbage collection.
+The app features a simple group chat room where multiple users can send messages to each other.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- [x] WebRTC mesh network
+- [x] Garbage collection (automatic peer removal)
+- [x] Extensible Signalling API
+- [x] Multiple Chat rooms
+- [ ] Secure handshake
+- [ ] Publish to pub.dev
+- [ ] Documentation
 
-A few resources to get you started if this is your first Flutter project:
+## Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This is a high level overview of the architecture of the app.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![WebRTC Model](.github/webrtc-dark.png#gh-dark-mode-only)
+![WebRTC Model](.github/webrtc.svg#gh-light-mode-only)
+
+## Showcase
+
+
+<details>
+<summary>Click to expand</summary>
+    <div style="text-align:center;"><h2><i>Room</i></h2></div>
+<p align="center">
+    <img src=".github/room.png" alt="Room" />
+</p>
+    <br>
+    <br>
+    <div style="text-align:center;"><h2><i>Chat</i></h2></div>
+<p align="center">
+    <img src=".github/chat.png" alt="Chat" />
+</p>
+
+</details>
