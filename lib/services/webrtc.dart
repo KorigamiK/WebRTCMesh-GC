@@ -235,23 +235,23 @@ class WebRTCMesh {
       assert(_peerConnections[peerID]?.conn != null);
       final pc = _peerConnections[peerID]!;
       print('handling offer from $peerID');
-      // if ((await pc.conn!.getRemoteDescription()) == null) {
-      await pc.conn!.setRemoteDescription(
-        RTCSessionDescription(
-          message['sdp'],
-          message['type'],
-        ),
-      );
-      final answer = await pc.conn!.createAnswer();
-      await pc.conn!.setLocalDescription(answer);
-      await _signalling.sendMessage('answer', {
-        'sdp': answer.sdp,
-        'type': answer.type,
-        'to': peerID,
-      });
-      // } else {
-      // print('offer:remote description already set');
-      // }
+      if ((await pc.conn!.getRemoteDescription()) == null) {
+        await pc.conn!.setRemoteDescription(
+          RTCSessionDescription(
+            message['sdp'],
+            message['type'],
+          ),
+        );
+        final answer = await pc.conn!.createAnswer();
+        await pc.conn!.setLocalDescription(answer);
+        await _signalling.sendMessage('answer', {
+          'sdp': answer.sdp,
+          'type': answer.type,
+          'to': peerID,
+        });
+      } else {
+        print('offer:remote description already set');
+      }
     } else {
       // create new peer and add to connecting queue
       print('adding $peerID to connecting queue');
