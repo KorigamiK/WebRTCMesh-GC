@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lmnop/models/message.dart';
 import 'package:lmnop/services/webrtc.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -14,30 +15,106 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final _messages = <Message>[];
+  final TextEditingController _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.webRTCMesh.dispose();
+  }
+
+  void _sendMessage(String message) {
+    widget.webRTCMesh.printPeers();
+    final message = _textController.text.trim();
+    if (message.isNotEmpty) {
+      widget.webRTCMesh.sendToAllPeers(message);
+      widget.webRTCMesh.messageStream.add(Message(
+        message: message,
+        type: 'text',
+        from: widget.webRTCMesh.localPeerID,
+      ));
+      _textController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              widget.webRTCMesh.printPeers();
+            },
+          ),
+        ],
+        title: Row(
           children: [
-            Text('Room ID: ${widget.roomId}'),
-            Text('Local Peer ID: ${widget.webRTCMesh.localPeerID}'),
-            ElevatedButton(
-                onPressed: () {
-                  widget.webRTCMesh.sendToAllPeers('Hello World');
-                },
-                child: const Text('Send Message')),
-            ElevatedButton(
-                onPressed: () {
-                  widget.webRTCMesh.printPeers();
-                },
-                child: const Text('Print Peers')),
+            Text('Room ${widget.roomId}',
+                style: Theme.of(context).textTheme.titleLarge),
+            const Spacer(),
           ],
         ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<Message>(
+              stream: widget.webRTCMesh.messageStream.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: Text('No messages yet'),
+                  );
+                }
+
+                _messages.add(snapshot.data!);
+
+                return ListView.builder(
+                  itemCount: _messages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final message = _messages[index];
+                    return ListTile(
+                      title: Text(message.message ?? ''),
+                      subtitle: Text(message.from),
+                      trailing: Text(message.type),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your message',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () {
+                    _sendMessage(_textController.text);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

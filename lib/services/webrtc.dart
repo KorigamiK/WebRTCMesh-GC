@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:lmnop/models/message.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
@@ -32,6 +33,7 @@ class PeerConnection {
 
   Future<void> dispose() async {
     await conn?.dispose();
+    await dataChannel?.close();
   }
 }
 
@@ -59,6 +61,18 @@ class WebRTCMesh {
     print('Peers: $_peerConnections');
     print('Connecting: $_connectingQueue');
   }
+
+  void dispose() {
+    // _signalling.sendMessage('leave', {}, announce: true);
+    _signalling.onMessage = null;
+    _connectingQueue.clear();
+    _peerConnections.forEach((key, value) async {
+      await _closePeerConnection(key);
+    });
+    messageStream.close();
+  }
+
+  StreamController<Message> messageStream = StreamController<Message>();
 
   WebRTCMesh({required this.roomID, String? peerID}) {
     localPeerID = peerID ?? const Uuid().v4();
@@ -99,7 +113,8 @@ class WebRTCMesh {
       return;
     }
     print('sending to $peerID: $message');
-    await pc.dataChannel!.send(RTCDataChannelMessage(message));
+    await pc.dataChannel!.send(RTCDataChannelMessage(jsonEncode(
+        Message(type: 'message', message: message, from: peerID).toJson())));
   }
 
   Future<void> sendToAllPeers(String message) async {
@@ -128,7 +143,8 @@ class WebRTCMesh {
   }
 
   Future<void> _createPeer(String peerID) async {
-    if (_peerConnections[peerID]?.conn != null) return;
+    if (_peerConnections[peerID]!.conn != null) print('peer already exists');
+
     final pc = _peerConnections[peerID]!;
     pc.conn = await createPeerConnection(configuration);
     pc.state = PeerConnectionState.connecting;
@@ -151,6 +167,11 @@ class WebRTCMesh {
           pc.state = PeerConnectionState.failed;
           pc.conn!.restartIce();
           break;
+        case RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+          print('disconnected $peerID');
+          pc.state = PeerConnectionState.disconnected;
+          _closePeerConnection(peerID);
+          break;
         default:
           break;
       }
@@ -172,20 +193,13 @@ class WebRTCMesh {
     final peer = _peerConnections[peerID]!;
     return (RTCDataChannelMessage message) {
       print('received: ${message.text}');
-      Map<String, dynamic> data;
-      final jsonStr = String.fromCharCodes(message.binary);
-      data = jsonDecode(jsonStr);
-      final type = data['type'];
-      final pid = data['from'];
-      // final payload = data['payload'];
-      switch (type) {
-        case 'handshake':
-          print('handshake from $pid');
-          peer.state = PeerConnectionState.connected;
-          break;
-        default:
-          print('unknown message type: $type');
+      Map<String, dynamic> data = jsonDecode(message.text);
+      var msg = Message.fromJson(data);
+      if (msg.type == 'handshake') {
+        print('handshake from ${msg.from}');
+        peer.state = PeerConnectionState.connected;
       }
+      messageStream.add(msg);
     };
   }
 
@@ -196,10 +210,8 @@ class WebRTCMesh {
       switch (state) {
         case RTCDataChannelState.RTCDataChannelOpen:
           print('data channel opened');
-          peer.dataChannel!.send(RTCDataChannelMessage(jsonEncode({
-            'type': 'handshake',
-            'from': localPeerID,
-          })));
+          peer.dataChannel!.send(RTCDataChannelMessage(
+              jsonEncode(Message(from: peerID, type: 'handshake'))));
           break;
         case RTCDataChannelState.RTCDataChannelClosed:
           print('data channel closed');
@@ -255,7 +267,6 @@ class WebRTCMesh {
     final pc = _peerConnections[peerID]!;
     print('handling answer from $peerID');
     if ((await pc.conn?.getRemoteDescription()) == null) {
-      // ? TODO: check if this is correct
       await pc.conn!.setRemoteDescription(
         RTCSessionDescription(
           message['sdp'],
