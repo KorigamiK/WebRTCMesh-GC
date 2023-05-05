@@ -1,5 +1,39 @@
-# LMNOP
+# WebRTC Mesh GC
 
-A new Flutter project.
+An implementation of a simple WebRTC mesh network with garbage collection.
+The app features a simple group chat room where multiple users can send messages to each other.
 
-![WebRTC model](.github/webrtc-model.png)
+## Features
+
+- [x] WebRTC mesh network
+- [x] Garbage collection (automatic peer removal)
+- [x] Extensible Signalling API
+- [x] Multiple Chat rooms
+- [ ] Secure handshake
+- [ ] Publish to pub.dev
+- [ ] Documentation
+
+## Architecture
+
+This is a high level overview of the architecture of the app.
+
+![WebRTC Model](.github/webrtc-dark.png#gh-dark-mode-only)
+![WebRTC Model](.github/webrtc.svg#gh-light-mode-only)
+
+## Showcase
+
+
+<details>
+<summary>Click to expand</summary>
+    <div style="text-align:center;"><h2><i>Room</i></h2></div>
+<p align="center">
+    <img src=".github/room.png" alt="Room" />
+</p>
+    <br>
+    <br>
+    <div style="text-align:center;"><h2><i>Chat</i></h2></div>
+<p align="center">
+    <img src=".github/chat.png" alt="Chat" />
+</p>
+
+</details>
