@@ -1,0 +1,3 @@
+[submodule "package/webrtc_mesh"]
+	path = package/webrtc_mesh
+	url = git@github.com:KorigamiK/webrtc_mesh.git
