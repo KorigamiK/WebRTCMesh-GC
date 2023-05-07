@@ -10,7 +10,7 @@ The app features a simple group chat room where multiple users can send messages
 - [x] Extensible Signalling API
 - [x] Multiple Chat rooms
 - [x] Publish to pub.dev
-- [ ] Refactor to use the package
+- [x] Refactor to use the package
 - [ ] Secure handshake
 - [ ] More Documentation?
 
