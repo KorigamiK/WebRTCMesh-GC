@@ -38,6 +38,8 @@ dependencies:
   firebase_core: ^2.10.0
   cloud_firestore: ^4.5.2
   uuid: ^3.0.7
+  webrtc_mesh:
+    path: package/webrtc_mesh
 
 dev_dependencies:
   flutter_test:

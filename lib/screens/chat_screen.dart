@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:lmnop/models/message.dart';
-import 'package:lmnop/services/webrtc.dart';
+import 'package:webrtc_mesh/webrtc_mesh.dart';
+
+import 'package:lmnop/services/firestore_signalling.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomId;
   final WebRTCMesh webRTCMesh;
 
   ChatScreen({Key? key, required this.roomId})
-      : webRTCMesh = WebRTCMesh(roomID: roomId),
+      : webRTCMesh = WebRTCMesh<FirestoreSignalling>(
+          roomID: roomId,
+          signallingCreator: (roomId, localPeerID) =>
+              FirestoreSignalling(roomId: roomId, localPeerID: localPeerID),
+        ),
         super(key: key);
 
   @override
